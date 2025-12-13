@@ -10,106 +10,160 @@ class Domain2Page extends StatefulWidget {
 }
 
 class _Domain2PageState extends State<Domain2Page> {
-  static const int totalPhases = 6;
+  // Configuración del test
+  static const int totalPhases = 5;
+  static const int repetitionsPerPhase = 2;
 
   int currentPhase = 0;
-  bool showInput = false;
+  int currentRepetition = 0;
 
-  List<List<int>> phaseNumbers = [];
-  List<bool> phaseResults = [];
+  bool showInstructions = true;
+  bool showInput = false;
+  bool testFinished = false;
+
+  List<List<int>> currentNumbers = [];
+  List<int> phaseFailures = [];
 
   final TextEditingController controller = TextEditingController();
+  final Random random = Random();
 
   @override
   void initState() {
     super.initState();
-    _generateAllPhases();
+    phaseFailures = List.filled(totalPhases, 0);
   }
 
-  void _generateAllPhases() {
-    final random = Random();
-    for (int i = 0; i < totalPhases; i++) {
-      int count = i + 2;
-      phaseNumbers.add(
-        List.generate(count, (_) => random.nextInt(9) + 1),
-      );
-      phaseResults.add(false);
-    }
+  // ---------------- LOGIC ----------------
+
+  void _startTest() {
+    _generateNumbers();
+    setState(() {
+      showInstructions = false;
+    });
   }
 
-  void _startPhase() {
+  void _generateNumbers() {
+    int digits = currentPhase + 4; // 4 to 9
+    currentNumbers = [
+      List.generate(digits, (_) => random.nextInt(9) + 1)
+    ];
+  }
+
+  void _startRepetition() {
     setState(() {
       showInput = true;
     });
   }
 
-  void _nextPhase() {
-    final expected =
-        phaseNumbers[currentPhase].join('');
+  void _nextStep() {
+    final expected = currentNumbers.first.join('');
+    final input = controller.text.replaceAll(' ', '');
 
-    final input =
-        controller.text.replaceAll(' ', '');
-
-    if (input == expected) {
-      phaseResults[currentPhase] = true;
+    if (input != expected) {
+      phaseFailures[currentPhase]++;
     }
 
     controller.clear();
+    showInput = false;
 
-    if (currentPhase < totalPhases - 1) {
+    // Si falla dos veces la fase → termina
+    if (phaseFailures[currentPhase] == repetitionsPerPhase) {
       setState(() {
-        currentPhase++;
-        showInput = false;
+        testFinished = true;
       });
-    } else {
-      setState(() {
-        showInput = false;
-      });
+      return;
     }
+
+    // Pasar a siguiente repetición o fase
+    if (currentRepetition < repetitionsPerPhase - 1) {
+      currentRepetition++;
+      _generateNumbers();
+    } else {
+      currentPhase++;
+      currentRepetition = 0;
+
+      if (currentPhase == totalPhases) {
+        testFinished = true;
+        setState(() {});
+        return;
+      }
+
+      _generateNumbers();
+    }
+
+    setState(() {});
   }
 
-  bool get isFinished => currentPhase == totalPhases - 1 && showInput == false;
+  // ---------------- UI ----------------
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Domain 2 Test'),
+        title: const Text('Domain 1 Test'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: isFinished
-            ? _buildResults()
-            : showInput
-                ? _buildInputPhase()
-                : _buildShowNumbersPhase(),
+        child: showInstructions
+            ? _buildInstructions()
+            : testFinished
+                ? _buildResults()
+                : showInput
+                    ? _buildInputPhase()
+                    : _buildShowNumbersPhase(),
       ),
     );
   }
 
-  // UI STATES
+  Widget _buildInstructions() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text(
+          'Memory Test',
+          style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 24),
+        const Text(
+          'You will see sequences of numbers.\n'
+          'Each phase has two attempts.\n'
+          'If you fail both attempts in the same phase, the test ends.\n\n'
+          'Try to remember the numbers in the exact order.',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 16),
+        ),
+        const SizedBox(height: 32),
+        ElevatedButton(
+          onPressed: _startTest,
+          child: const Text('Start Test'),
+        ),
+      ],
+    );
+  }
+
   Widget _buildShowNumbersPhase() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          'Phase ${currentPhase + 1}',
+          'Phase ${currentPhase + 1} '
+          '(Attempt ${currentRepetition + 1}/$repetitionsPerPhase)',
           style: const TextStyle(
-            fontSize: 22,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 24),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: phaseNumbers[currentPhase]
+          children: currentNumbers.first
               .map(
                 (n) => Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
                   child: Text(
                     n.toString(),
                     style: const TextStyle(
-                      fontSize: 32,
+                      fontSize: 30,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -119,8 +173,8 @@ class _Domain2PageState extends State<Domain2Page> {
         ),
         const SizedBox(height: 32),
         ElevatedButton(
-          onPressed: _startPhase,
-          child: const Text('Start'),
+          onPressed: _startRepetition,
+          child: const Text('Enter'),
         ),
       ],
     );
@@ -130,68 +184,54 @@ class _Domain2PageState extends State<Domain2Page> {
     return Column(
       children: [
         Text(
-          'Phase ${currentPhase + 1}',
+          'Phase ${currentPhase + 1} '
+          '(Attempt ${currentRepetition + 1}/$repetitionsPerPhase)',
           style: const TextStyle(
-            fontSize: 22,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 24),
-
         TextField(
           controller: controller,
           keyboardType: TextInputType.number,
           decoration: const InputDecoration(
-            labelText: 'Enter the numbers',
+            labelText: 'Enter the sequence',
             border: OutlineInputBorder(),
           ),
         ),
-
         const SizedBox(height: 16),
-
-        // Speech to text widget
         STTUWidget(),
-
         const Spacer(),
-
         ElevatedButton(
-          onPressed: _nextPhase,
-          child: Text(
-            currentPhase == totalPhases - 1
-                ? 'Finish'
-                : 'Next',
-          ),
+          onPressed: _nextStep,
+          child: const Text('Next'),
         ),
       ],
     );
   }
 
   Widget _buildResults() {
-    final failed =
-        phaseResults.where((e) => e == false).length;
+    final failedPhases =
+        phaseFailures.where((f) => f == repetitionsPerPhase).length;
 
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Text(
-            'Test Results',
-            style: TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-            ),
+            'Results',
+            style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 24),
           Text(
-            'Failed phases: $failed / $totalPhases',
-            style: const TextStyle(fontSize: 20),
+            'Failed phases: $failedPhases / $totalPhases',
+            style: const TextStyle(fontSize: 18),
           ),
           const SizedBox(height: 32),
           ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text('Back'),
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Finish'),
           ),
         ],
       ),
