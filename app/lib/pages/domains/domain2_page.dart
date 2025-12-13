@@ -10,7 +10,7 @@ class Domain2Page extends StatefulWidget {
 }
 
 class _Domain2PageState extends State<Domain2Page> {
-  // Configuración del test
+  // Test config
   static const int totalPhases = 5;
   static const int repetitionsPerPhase = 2;
 
@@ -33,7 +33,19 @@ class _Domain2PageState extends State<Domain2Page> {
     phaseFailures = List.filled(totalPhases, 0);
   }
 
-  // ---------------- LOGIC ----------------
+
+  // Logic
+  void _onSpeechWordsUpdated(List<String> words) {
+    // Join the words and skip the gaps
+    final text = words.join('').replaceAll(' ', '');
+
+    setState(() {
+        controller.text = text;
+        controller.selection = TextSelection.fromPosition(
+        TextPosition(offset: controller.text.length),
+        );
+    });
+    }
 
   void _startTest() {
     _generateNumbers();
@@ -66,7 +78,7 @@ class _Domain2PageState extends State<Domain2Page> {
     controller.clear();
     showInput = false;
 
-    // Si falla dos veces la fase → termina
+    // If fails twice in the same fase, it terminates
     if (phaseFailures[currentPhase] == repetitionsPerPhase) {
       setState(() {
         testFinished = true;
@@ -74,7 +86,7 @@ class _Domain2PageState extends State<Domain2Page> {
       return;
     }
 
-    // Pasar a siguiente repetición o fase
+    // Pass to the next fase
     if (currentRepetition < repetitionsPerPhase - 1) {
       currentRepetition++;
       _generateNumbers();
@@ -94,13 +106,13 @@ class _Domain2PageState extends State<Domain2Page> {
     setState(() {});
   }
 
-  // ---------------- UI ----------------
 
+  // UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Domain 1 Test'),
+        title: const Text("Test d'atenció"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -120,7 +132,7 @@ class _Domain2PageState extends State<Domain2Page> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Text(
-          'Memory Test',
+          "Instruccions",
           style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 24),
@@ -135,7 +147,7 @@ class _Domain2PageState extends State<Domain2Page> {
         const SizedBox(height: 32),
         ElevatedButton(
           onPressed: _startTest,
-          child: const Text('Start Test'),
+          child: const Text('Començar'),
         ),
       ],
     );
@@ -146,8 +158,8 @@ class _Domain2PageState extends State<Domain2Page> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          'Phase ${currentPhase + 1} '
-          '(Attempt ${currentRepetition + 1}/$repetitionsPerPhase)',
+          'Fase ${currentPhase + 1} '
+          '(Ronda ${currentRepetition + 1}/$repetitionsPerPhase)',
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -174,7 +186,7 @@ class _Domain2PageState extends State<Domain2Page> {
         const SizedBox(height: 32),
         ElevatedButton(
           onPressed: _startRepetition,
-          child: const Text('Enter'),
+          child: const Text('Introduir'),
         ),
       ],
     );
@@ -184,8 +196,8 @@ class _Domain2PageState extends State<Domain2Page> {
     return Column(
       children: [
         Text(
-          'Phase ${currentPhase + 1} '
-          '(Attempt ${currentRepetition + 1}/$repetitionsPerPhase)',
+          'Fase ${currentPhase + 1} '
+          '(Ronda ${currentRepetition + 1}/$repetitionsPerPhase)',
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -196,16 +208,18 @@ class _Domain2PageState extends State<Domain2Page> {
           controller: controller,
           keyboardType: TextInputType.number,
           decoration: const InputDecoration(
-            labelText: 'Enter the sequence',
+            labelText: 'Introdueix la seqüència',
             border: OutlineInputBorder(),
           ),
         ),
         const SizedBox(height: 16),
-        STTUWidget(),
+        STTUWidget(
+        onWordsUpdated: _onSpeechWordsUpdated,
+        ),
         const Spacer(),
         ElevatedButton(
           onPressed: _nextStep,
-          child: const Text('Next'),
+          child: const Text('Següent'),
         ),
       ],
     );
@@ -220,18 +234,18 @@ class _Domain2PageState extends State<Domain2Page> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Text(
-            'Results',
+            'Resultats',
             style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 24),
           Text(
-            'Failed phases: $failedPhases / $totalPhases',
+            'Fases fallides: $failedPhases / $totalPhases',
             style: const TextStyle(fontSize: 18),
           ),
           const SizedBox(height: 32),
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Finish'),
+            child: const Text('Acabar'),
           ),
         ],
       ),

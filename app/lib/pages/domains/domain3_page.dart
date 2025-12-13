@@ -10,7 +10,7 @@ class Domain3Page extends StatefulWidget {
 }
 
 class _Domain3PageState extends State<Domain3Page> {
-  // Configuración del test
+  // Test config
   static const int totalPhases = 5;
   static const int repetitionsPerPhase = 2;
 
@@ -33,7 +33,19 @@ class _Domain3PageState extends State<Domain3Page> {
     phaseFailures = List.filled(totalPhases, 0);
   }
 
-  // ---------------- LOGIC ----------------
+
+  // Logic
+  void _onSpeechWordsUpdated(List<String> words) {
+    // Join the words and skip the gaps
+    final text = words.join('').replaceAll(' ', '');
+
+    setState(() {
+      controller.text = text;
+      controller.selection = TextSelection.fromPosition(
+        TextPosition(offset: controller.text.length),
+      );
+    });
+  }
 
   void _startTest() {
     _generateNumbers();
@@ -43,7 +55,7 @@ class _Domain3PageState extends State<Domain3Page> {
   }
 
   void _generateNumbers() {
-    int digits = currentPhase + 4; // 4 a 9
+    int digits = currentPhase + 4; // 4 to 9
     currentNumbers =
         List.generate(digits, (_) => random.nextInt(9) + 1);
   }
@@ -55,7 +67,7 @@ class _Domain3PageState extends State<Domain3Page> {
   }
 
   void _nextStep() {
-    // 🔁 Secuencia correcta en orden inverso
+    // Sequence in reverse order
     final expected =
         currentNumbers.reversed.join('');
 
@@ -69,7 +81,7 @@ class _Domain3PageState extends State<Domain3Page> {
     controller.clear();
     showInput = false;
 
-    // ❌ Si falla dos veces la fase → termina
+    // If fails twice in the same fase, it terminates
     if (phaseFailures[currentPhase] == repetitionsPerPhase) {
       setState(() {
         testFinished = true;
@@ -77,7 +89,7 @@ class _Domain3PageState extends State<Domain3Page> {
       return;
     }
 
-    // ➡️ Pasar a siguiente repetición o fase
+    // Pass to the next fase
     if (currentRepetition < repetitionsPerPhase - 1) {
       currentRepetition++;
       _generateNumbers();
@@ -97,13 +109,13 @@ class _Domain3PageState extends State<Domain3Page> {
     setState(() {});
   }
 
-  // ---------------- UI ----------------
 
+  // UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Domain 1 – Reverse Memory'),
+        title: const Text('Test de memòria de treball'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -118,14 +130,14 @@ class _Domain3PageState extends State<Domain3Page> {
     );
   }
 
-  // ---------------- SCREENS ----------------
 
+  // Screens
   Widget _buildInstructions() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Text(
-          'Reverse Digit Memory Test',
+          'Instruccions',
           style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 24),
@@ -143,7 +155,7 @@ class _Domain3PageState extends State<Domain3Page> {
         const SizedBox(height: 32),
         ElevatedButton(
           onPressed: _startTest,
-          child: const Text('Start Test'),
+          child: const Text('Començar'),
         ),
       ],
     );
@@ -154,8 +166,8 @@ class _Domain3PageState extends State<Domain3Page> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          'Phase ${currentPhase + 1} '
-          '(Attempt ${currentRepetition + 1}/$repetitionsPerPhase)',
+          'Fase ${currentPhase + 1} '
+          '(Ronda ${currentRepetition + 1}/$repetitionsPerPhase)',
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -182,7 +194,7 @@ class _Domain3PageState extends State<Domain3Page> {
         const SizedBox(height: 32),
         ElevatedButton(
           onPressed: _startRepetition,
-          child: const Text('Enter in reverse'),
+          child: const Text('Introduir'),
         ),
       ],
     );
@@ -192,8 +204,8 @@ class _Domain3PageState extends State<Domain3Page> {
     return Column(
       children: [
         Text(
-          'Phase ${currentPhase + 1} '
-          '(Attempt ${currentRepetition + 1}/$repetitionsPerPhase)',
+          'Fase ${currentPhase + 1} '
+          '(Ronda ${currentRepetition + 1}/$repetitionsPerPhase)',
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -204,16 +216,18 @@ class _Domain3PageState extends State<Domain3Page> {
           controller: controller,
           keyboardType: TextInputType.number,
           decoration: const InputDecoration(
-            labelText: 'Enter the numbers in reverse order',
+            labelText: 'Introdueix la seqüència en ordre invers',
             border: OutlineInputBorder(),
           ),
         ),
         const SizedBox(height: 16),
-        STTUWidget(),
+        STTUWidget(
+          onWordsUpdated: _onSpeechWordsUpdated,
+        ),
         const Spacer(),
         ElevatedButton(
           onPressed: _nextStep,
-          child: const Text('Next'),
+          child: const Text('Següent'),
         ),
       ],
     );
@@ -228,18 +242,18 @@ class _Domain3PageState extends State<Domain3Page> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Text(
-            'Results',
+            'Resultats',
             style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 24),
           Text(
-            'Failed phases: $failedPhases / $totalPhases',
+            'Fases fallides: $failedPhases / $totalPhases',
             style: const TextStyle(fontSize: 18),
           ),
           const SizedBox(height: 32),
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Finish'),
+            child: const Text('Acabar'),
           ),
         ],
       ),
