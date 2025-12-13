@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'dart:async';
 
 class Domain4Page extends StatefulWidget {
   const Domain4Page({super.key});
@@ -18,10 +19,15 @@ class ButtonNum {
 }
 
 class Page4 extends State<Domain4Page> {
+  Timer? timer;
+  int milliseconds = 0;
+  bool running = false;
   bool showStartButton = true;
   List<List<int>> matrix = List.generate(4, (_) => List.filled(5, 0));
   List<ButtonNum> buttons = [];
   final Random random = Random();
+  bool showEndButton = false;
+  
 
   int buttonAct = 0;
 
@@ -47,6 +53,22 @@ class Page4 extends State<Domain4Page> {
     }
   }
 
+  void startTimer() {
+    if (running) return;
+
+    running = true;
+    timer = Timer.periodic(const Duration(milliseconds: 10), (timer) {
+      setState(() {
+        milliseconds += 10;
+      });
+    });
+  }
+
+  void stopTimer() {
+    timer?.cancel();
+    running = false;
+  }
+
   int resultButton (ButtonNum btn) {
 
      if(btn.value == buttonAct + 1){
@@ -62,6 +84,10 @@ class Page4 extends State<Domain4Page> {
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
+    final double screenWidth = size.width;
+    final double screenHeight = size.height * 0.7;
+    final double aspectRatio = screenWidth / screenHeight;
     return Scaffold(
       appBar: AppBar(title: const Text('Test de velocitat')),
       body: showStartButton
@@ -72,18 +98,21 @@ class Page4 extends State<Domain4Page> {
                     showStartButton = false;
                     clearMatrix();
                     positionNumbers();
+                    startTimer();
                   });
                 },
-                child: const Text('Començar Prova'),
+                child: 
+                const Text('Començar Prova'),
               ),
             )
           : Padding(
               padding: const EdgeInsets.all(8.0),
               child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 4,
                   crossAxisSpacing: 4,
                   mainAxisSpacing: 4,
+                  childAspectRatio: aspectRatio,
                 ),
                 itemCount: 20,
                 itemBuilder: (context, index) {
@@ -93,23 +122,23 @@ class Page4 extends State<Domain4Page> {
                   if (value != 0) {
                     ButtonNum btn =
                         buttons.firstWhere((b) => b.value == value);
-                    return ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: btn.active ? Colors.white : Colors.grey[700],
-                        foregroundColor: Colors.black,
-                        side: BorderSide(
-                          color: btn.redBorder
-                              ? Colors.red
-                              : btn.greenBorder
-                                  ? Colors.green
-                                  : Colors.blue,
-                          width: 4,
+                    return SizedBox.expand(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: btn.active ? Colors.white : Colors.grey[700],
+                          side: BorderSide(
+                            color: btn.redBorder
+                                ? Colors.red
+                                : btn.greenBorder
+                                    ? Colors.green
+                                    : Colors.blue,
+                            width: 4,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      onPressed: btn.active
+                        onPressed: btn.active
                           ? () {
                               setState(() {
                                 if(resultButton(btn) == 1){
@@ -120,7 +149,8 @@ class Page4 extends State<Domain4Page> {
                                 else if(resultButton(btn) == 2){
                                   btn.active = false;
                                   btn.greenBorder = true;
-                                  buttonAct++;
+                                  stopTimer();
+                                  showEndButton = true;
                                 }
                                 else{
                                   btn.redBorder = true;
@@ -137,11 +167,15 @@ class Page4 extends State<Domain4Page> {
                               
                             }
                           : null,
-
-                      child: Text(
-                        '${btn.value}',
-                        style: const TextStyle(
-                          fontSize: 71,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown, // evita que el text sobresurti
+                          child: Text(
+                            '${btn.value}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 50, // augmenta el tamany base
+                            ),
+                          ),
                         ),
                       ),
                     );
