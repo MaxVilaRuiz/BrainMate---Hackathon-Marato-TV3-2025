@@ -1,112 +1,3 @@
-// import 'package:flutter/material.dart';
-// import 'dart:math';
-
-
-
-// class Dom4Page extends StatefulWidget {
-//   const Dom4Page({super.key});
-
-//   @override
-//   State<Dom4Page> createState() => Page4();
-// }
-
-
-// class ButtonNum {
-
-//     final int value;
-//     bool active = true;
-
-//     @override
-//     ButtonNum(this.value);
-
-//     void check (){
-
-//         if(this.value == buttonAct - 1){
-                
-//             this.active = false;
-//         }
-
-//     }
-
-//     @override
-//     Widget build(BuildContext context) {
-//     return Scaffold(
-//         body: Center(
-//         child: active
-//             ? ElevatedButton(
-//                 onPressed: () {
-//                     setState(() {
-//                     active = false; // desapareix el botó
-//                     });
-//                 },
-//                 child: const Text('$value'),
-//             )
-//         ),
-//     );
-//     }
-// }
-
-
-
-// class Page4 extends State<Dom4Page>{
-//     bool showStartButton = true;
-//     List<List<int> > matrix = List.generate(
-//     4,
-//     (_) => List.filled(5, 0), 
-//     );
-
-//     int buttonAct = 0;
-
-//     final Random random = Random();
-
-//     @override
-
-//     void clearMatrix (){
-//         for(int i = 0; i<4; i++){
-//             for(int j = 0; j<5; j++){
-//                 matrix[i] [j] = 0;
-//             }
-//         }
-//     }
-    
-
-//     void positionNumbers (){
-//         for(int i = 1; i<11; i++){
-//             int r = random.nextInt(20);
-//             if(matrix[r/4] [r%5] == 0){
-//                 matrix[r/4] [r%5] = i;
-//             }
-//             else{
-//                 i--;
-//             }
-//         }
-//     }
-
-//     @override
-//     Widget build(BuildContext context) {
-//     return Scaffold(
-//         appBar: AppBar(title: const Text('Dom4')),
-//         body: Center(
-//         child: showStartButton
-//             ? ElevatedButton(
-//                 onPressed: () {
-//                     setState(() {
-//                     showStartButton = false; // desapareix el botó
-//                     clearMatrix();
-//                     positionNumbers(); // inicialitza la matriu
-//                     });
-//                 },
-//                 child: const Text('Començar Prova'),
-//                 )
-//         ),
-//     );
-//     }
-
-
-// }
-
-
-
 import 'package:flutter/material.dart';
 import 'dart:math';
 
@@ -117,10 +8,11 @@ class Domain4Page extends StatefulWidget {
   State<Domain4Page> createState() => Page4();
 }
 
-// Classe simple per guardar el número i si és actiu
 class ButtonNum {
   final int value;
   bool active;
+  bool redBorder = false;
+  bool greenBorder = false;
 
   ButtonNum(this.value, {this.active = true});
 }
@@ -155,10 +47,23 @@ class Page4 extends State<Domain4Page> {
     }
   }
 
+  int resultButton (ButtonNum btn) {
+
+     if(btn.value == buttonAct + 1){
+        if(btn.value == 10){
+          return 2;
+        }
+        return 1;
+     }
+     return -1;
+
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Dom4')),
+      appBar: AppBar(title: const Text('Test de velocitat')),
       body: showStartButton
           ? Center(
               child: ElevatedButton(
@@ -176,7 +81,7 @@ class Page4 extends State<Domain4Page> {
               padding: const EdgeInsets.all(8.0),
               child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 5,
+                  crossAxisCount: 4,
                   crossAxisSpacing: 4,
                   mainAxisSpacing: 4,
                 ),
@@ -189,15 +94,56 @@ class Page4 extends State<Domain4Page> {
                     ButtonNum btn =
                         buttons.firstWhere((b) => b.value == value);
                     return ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: btn.active ? Colors.white : Colors.grey[700],
+                        foregroundColor: Colors.black,
+                        side: BorderSide(
+                          color: btn.redBorder
+                              ? Colors.red
+                              : btn.greenBorder
+                                  ? Colors.green
+                                  : Colors.blue,
+                          width: 4,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
                       onPressed: btn.active
                           ? () {
                               setState(() {
-                                btn.active = false;
-                                buttonAct++;
+                                if(resultButton(btn) == 1){
+                                  btn.active = false;
+                                  btn.greenBorder = true;
+                                  buttonAct++;
+                                }
+                                else if(resultButton(btn) == 2){
+                                  btn.active = false;
+                                  btn.greenBorder = true;
+                                  buttonAct++;
+                                }
+                                else{
+                                  btn.redBorder = true;
+                                }
+                                
                               });
+                              if(btn.redBorder){
+                                Future.delayed(const Duration(milliseconds: 500), () {
+                                  setState(() {
+                                    btn.redBorder = false;
+                                  });
+                                });
+                              }
+                              
                             }
                           : null,
-                      child: Text('${btn.value}'),
+
+                      child: Text(
+                        '${btn.value}',
+                        style: const TextStyle(
+                          fontSize: 71,
+                        ),
+                      ),
                     );
                   } else {
                     return Container(color: Colors.grey[200]);
