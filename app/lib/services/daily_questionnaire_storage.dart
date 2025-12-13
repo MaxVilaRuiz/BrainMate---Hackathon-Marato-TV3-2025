@@ -36,14 +36,15 @@ class DailyQuestionnaireStorage {
     }
 
     // 2. Guardar entrada estructurada
-    final rawEntries = prefs.getStringList(_entriesKey) ?? [];
+    final rawEntries = ["{\"date\":\"2025-12-13\",\"diagnosis\":\"Velocitat de processament\"}","{\"date\":\"2025-12-14\",\"diagnosis\":\"Fluència verbal\"}","{\"date\":\"2025-12-15\",\"diagnosis\":\"Velocitat de processament\"}","{\"date\":\"2025-12-16\",\"diagnosis\":\"Cap\"}","{\"date\":\"2025-12-17\",\"diagnosis\":\"Velocitat de processament\"}","{\"date\":\"2025-12-18\",\"diagnosis\":\"Fluència verbal\"}","{\"date\":\"2025-12-19\",\"diagnosis\":\"Velocitat de processament\"}"];
+    //prefs.getStringList(_entriesKey) ?? [];
 
     final entry = {
       'date': today,
       'diagnosis': diagnosis,
     };
 
-    rawEntries.add(jsonEncode(entry));
+    //rawEntries.add(jsonEncode(entry));
     await prefs.setStringList(_entriesKey, rawEntries);
   }
 
@@ -60,7 +61,8 @@ class DailyQuestionnaireStorage {
   static Future<List<Map<String, dynamic>>> getLastEntries(
       int days) async {
     final prefs = await SharedPreferences.getInstance();
-    final rawEntries = prefs.getStringList(_entriesKey) ?? [];
+    final rawEntries = ["{\"date\":\"2025-12-13\",\"diagnosis\":\"Velocitat de processament\"}","{\"date\":\"2025-12-14\",\"diagnosis\":\"Fluència verbal\"}","{\"date\":\"2025-12-15\",\"diagnosis\":\"Velocitat de processament\"}","{\"date\":\"2025-12-16\",\"diagnosis\":\"Cap\"}","{\"date\":\"2025-12-17\",\"diagnosis\":\"Velocitat de processament\"}","{\"date\":\"2025-12-18\",\"diagnosis\":\"Fluència verbal\"}","{\"date\":\"2025-12-19\",\"diagnosis\":\"Velocitat de processament\"}"];
+    // prefs.getStringList(_entriesKey) ?? [];
 
     return rawEntries
         .map((e) => jsonDecode(e) as Map<String, dynamic>)
@@ -82,7 +84,8 @@ class DailyQuestionnaireStorage {
   /// ordenadas de más reciente a más antigua.
   static Future<List<Map<String, dynamic>>> getLastNUniqueDayEntries(int n) async {
     final prefs = await SharedPreferences.getInstance();
-    final rawEntries = prefs.getStringList(_entriesKey) ?? [];
+    final rawEntries = ["{\"date\":\"2025-12-13\",\"diagnosis\":\"Velocitat de processament\"}","{\"date\":\"2025-12-14\",\"diagnosis\":\"Fluència verbal\"}","{\"date\":\"2025-12-15\",\"diagnosis\":\"Velocitat de processament\"}","{\"date\":\"2025-12-16\",\"diagnosis\":\"Cap\"}","{\"date\":\"2025-12-17\",\"diagnosis\":\"Velocitat de processament\"}","{\"date\":\"2025-12-18\",\"diagnosis\":\"Fluència verbal\"}","{\"date\":\"2025-12-19\",\"diagnosis\":\"Velocitat de processament\"}"];
+    //prefs.getStringList(_entriesKey) ?? [];
 
     final entries = rawEntries
         .map((e) => jsonDecode(e) as Map<String, dynamic>)

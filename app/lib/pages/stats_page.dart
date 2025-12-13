@@ -6,43 +6,71 @@ class StatsPage extends StatelessWidget {
 
   static const int requiredDays = 7;
 
-  // Videos + recomendaciones (pon aquí los definitivos cuando los tengas)
+  // Videos + Recommendations
   static const Map<String, List<String>> videosByDiagnosis = {
     'Atenció': [
-      'https://example.com/video/attention-1',
-      'https://example.com/video/attention-2',
+      'https://www.youtube.com/watch?v=B_M8eFq2GCA',
+      'https://www.youtube.com/watch?v=_5HCl5CDA94',
+      'https://www.youtube.com/watch?v=fXDHm8PP6qo',
+      'https://www.youtube.com/watch?v=OlyIT2zIimw',
+      'https://www.youtube.com/watch?v=zXqljYzFb3w',
     ],
     'Memòria': [
-      'https://example.com/video/memory-1',
-      'https://example.com/video/memory-2',
+      'https://www.youtube.com/watch?v=RExO6edCQYk',
+      'https://www.youtube.com/watch?v=FJIy-R3Gze4',
+      'https://www.youtube.com/watch?v=iGTnb1YeRNw',
     ],
     'Velocitat de processament': [
-      'https://example.com/video/processing-1',
-      'https://example.com/video/processing-2',
+      'https://www.youtube.com/watch?v=RExO6edCQYk',
+      'https://www.youtube.com/watch?v=FJIy-R3Gze4',
     ],
     'Fluència verbal': [
-      'https://example.com/video/fluency-1',
-      'https://example.com/video/fluency-2',
+      'https://www.youtube.com/watch?v=B_M8eFq2GCA',
+      'https://www.youtube.com/watch?v=_5HCl5CDA94',
+      'https://www.youtube.com/watch?v=fXDHm8PP6qo',
+      'https://www.youtube.com/watch?v=OlyIT2zIimw',
+      'https://www.youtube.com/watch?v=zXqljYzFb3w',
     ],
-    'Cap': [
-      'https://example.com/video/maintenance-1',
-    ],
+    'Cap': [],
   };
 
   static const Map<String, String> recommendationByDiagnosis = {
-    'Atenció':
-        'Recomanació: redueix distraccions (notificacions), treballa en blocs de 10–20 min i fes pauses curtes.',
-    'Memòria':
-        'Recomanació: fes servir pistes (notes breus), repetició espaiada i rutines estables (mateix lloc per a objectes).',
-    'Velocitat de processament':
-        'Recomanació: baixa ritme, una tasca a la vegada, evita multitasking i dorm/descansa adequadament.',
-    'Fluència verbal':
-        'Recomanació: practica recuperació de paraules (categories, sinònims), parla en veu alta i fes lectura guiada.',
-    'Cap':
-        'Recomanació: mantén hàbits saludables (son, activitat física suau, hidratació) i continua registrant 7 dies seguits.',
+    'Atenció': '''
+  Avui és un bon dia per fer algo d'esport, potser anar a caminar una estona o alguna altra activitat que et vingui de gust.
+  Aquesta setmana és ideal per fer alguna manualitat, posa molta atenció en allò que fas, potser un dibuix, un puzle, cosir alguna cosa, etc.
+  Si tens una estona, llegeix un text curt (una notícia, un paràgraf d’un llibre) i intenta comprendre’l detenidament. Pots subratllar mentalment les idees importants per mantenir-te concentrat.
+  ''',
+
+    'Memòria': '''
+  Avui és un bon dia per fer algo d'esport, potser anar a caminar una estona o alguna altra activitat que et vingui de gust.
+  Aquesta setmana és ideal per tornar a fer aquella recepta que has deixat de fer i et sortia tan bé.
+  Prova d'aprendre algunes paraules d'un nou idioma, potser un idioma que ja en sàpigues una mica o un completament nou!
+  ''',
+
+    'Velocitat de processament': '''
+  Avui és un bon dia per fer algo d'esport, potser anar a caminar una estona o alguna altra activitat que et vingui de gust.
+  Avui és el dia de les decisions ràpides: no pots tardar més de 15 segons en escollir la roba que et posaràs.
+  Dia d'anar al supermercat! Prova a trobar el més ràpid possible on són les galetes Maria al teu supermercat de confiança.
+  ''',
+
+    'Fluència verbal': '''
+  Avui és un bon dia per fer algo d'esport, potser anar a caminar una estona o alguna altra activitat que et vingui de gust.
+  Avui durant 5 minuts has d'anar dient els objectes que veus al teu voltant.
+  Pensa durant uns minuts quantes fruites i verdures hi ha de color vermell.
+  ''',
+
+    'Cap': '''
+  Enhorabona! Les teves respostes indiquen que actualment no presentes problemes cognitius.
+  És important, però, mantenir un estil de vida saludable per ajudar a prevenir-ho. T'animem a:
+  - Fer esport
+  - Cuidar l'alimentació
+  - Aprendre coses noves
+  - Sociabilitzar
+  - Practicar mindfulness
+  ''',
   };
 
-  // Los diagnósticos que quieres mostrar (y su orden base si empatan)
+  // The diagnoses to display
   static const List<String> trackedDiagnoses = [
     'Atenció',
     'Memòria',
@@ -74,17 +102,17 @@ class StatsPage extends StatelessWidget {
           );
         }
 
-        // Contar diagnósticos en los últimos 7 días
+        // Count diagnoses in the last 7 days
         final counts = <String, int>{};
         for (final e in entries) {
           final diag = (e['diagnosis'] as String?) ?? 'Cap';
           counts[diag] = (counts[diag] ?? 0) + 1;
         }
 
-        // Si todos son "Cap" => bloque "Sin problemas"
+        // If all are "Cap" => block "No problems"
         final allNoProblem = entries.every((e) => (e['diagnosis'] as String?) == 'Cap');
 
-        // Diagnósticos detectados (de los 4 que te interesan), ordenados por frecuencia desc
+        // Diagnoses detected, ordered by frequency
         final detected = trackedDiagnoses
             .where((d) => (counts[d] ?? 0) > 0)
             .toList()
@@ -92,14 +120,15 @@ class StatsPage extends StatelessWidget {
             final cb = counts[b] ?? 0;
             final ca = counts[a] ?? 0;
             if (cb != ca) return cb.compareTo(ca);
-            // empate -> respeta el orden base
+            // Respect the order if is a draw
             return trackedDiagnoses.indexOf(a).compareTo(trackedDiagnoses.indexOf(b));
           });
 
-        // Bloques a mostrar
+        // Blocks to show
         final blocks = <Widget>[];
 
-        // 1) Bloque problemas cognitivos (no se usa de momento)
+        // TODO
+        // Cognitive problems block
         blocks.add(_InfoBlock(
           title: 'Problemes cognitius (no actiu)',
           subtitle: 'Aquest bloc no s’està utilitzant de moment.',
@@ -108,7 +137,7 @@ class StatsPage extends StatelessWidget {
           urls: const [],
         ));
 
-        // 2) Bloque sin problemas (si aplica)
+        // Block without problems 
         if (allNoProblem || detected.isEmpty) {
           blocks.add(_InfoBlock(
             title: 'No s’han detectat problemes',
@@ -118,13 +147,12 @@ class StatsPage extends StatelessWidget {
           ));
         }
 
-        // 3) Bloques de diagnósticos detectados (en orden)
+        // Diagnostic blocks detected in order
         for (final diag in detected) {
           blocks.add(_InfoBlock(
             title: diag,
-            subtitle:
-                'Detectat ${counts[diag]} de $requiredDays dies.',
-            recommendation: recommendationByDiagnosis[diag] ?? 'Recomanació: mantén un pla d’entrenament breu i constant.',
+            subtitle: 'Detectat ${counts[diag]} de $requiredDays dies.',
+            recommendation: recommendationByDiagnosis[diag] ?? 'Mantén un pla d’entrenament breu i constant.',
             urls: videosByDiagnosis[diag] ?? const [],
           ));
         }
@@ -133,7 +161,11 @@ class StatsPage extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           children: [
             const Text(
-              'Stats (últims 7 dies)',
+              'Mesura subjectiva',
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              "Resultats de la setmana del XXX", 
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
@@ -170,14 +202,34 @@ class _InfoBlock extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(title,
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 6),
-            Text(subtitle, style: const TextStyle(fontSize: 14, color: Colors.black54)),
+            Text(subtitle,
+                style:
+                    const TextStyle(fontSize: 14, color: Colors.black54)),
             const SizedBox(height: 12),
-            Text(recommendation, style: const TextStyle(fontSize: 14)),
+
+            // Recommendations
+            const Text(
+              'Recomanacions:',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              recommendation,
+              style: const TextStyle(fontSize: 14),
+            ),
+
+            // Videos
             if (urls.isNotEmpty) ...[
               const SizedBox(height: 12),
-              const Text('Vídeos recomanats:', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+              const Text(
+                'Vídeos recomanats:',
+                style:
+                    TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              ),
               const SizedBox(height: 6),
               ...urls.map(
                 (u) => Padding(
