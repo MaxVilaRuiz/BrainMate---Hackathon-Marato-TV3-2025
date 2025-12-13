@@ -14,11 +14,17 @@ class _DailyQuestionnairePageState
   String? selectedOption;
 
   final List<String> options = [
-    'Very good',
-    'Good',
-    'Neutral',
-    'Bad',
-    'Very bad',
+    'He anat a un lloc de l’habitació i, quan hi he arribat, no he recordat què hi anava a fer.',
+    'He trigat més del normal a fer una activitat que abans feia més ràpid.',
+    'Volia dir una paraula i no m’ha sortit, o n’he dit una altra sense voler.',
+    'Quan estava parlant amb algú, he perdut el fil de la conversa.',
+    'M’han preguntat per una cosa que m’havien dit fa poc i no me n’he recordat.',
+    'He tingut problemes per recordar informació que ja sabia prèviament.',
+    'He tingut problemes per prendre una decisió que abans no m’hauria costat.',
+    'He tingut dificultats per planificar el meu dia.',
+    'He sentit sensació de nebulosa mental.',
+    'He sentit que penso més lenta avui.',
+    'Ninguna de les anteriors.',
   ];
 
   Future<void> _submit() async {
@@ -26,7 +32,7 @@ class _DailyQuestionnairePageState
 
     await DailyQuestionnaireStorage.markTodayAsCompleted();
     if (mounted) {
-      Navigator.pop(context); // vuelve a Home
+      Navigator.pop(context); // Go back to Home
     }
   }
 
@@ -34,14 +40,14 @@ class _DailyQuestionnairePageState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Daily Questionnaire'),
+        title: const Text('Qüestionari Diari - Mesura subjectiva'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             const Text(
-              'How do you feel today?',
+              "Què és el que t'acaba de passar?",
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 24),
@@ -62,13 +68,13 @@ class _DailyQuestionnairePageState
               },
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                labelText: 'Select one option',
+                labelText: 'Selecciona una opció',
               ),
             ),
             const Spacer(),
             ElevatedButton(
               onPressed: _submit,
-              child: const Text('Submit'),
+              child: const Text('Enviar'),
             ),
           ],
         ),
