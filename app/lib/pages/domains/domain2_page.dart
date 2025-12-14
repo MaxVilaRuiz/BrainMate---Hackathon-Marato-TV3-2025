@@ -34,9 +34,9 @@ class _Domain2PageState extends State<Domain2Page> {
 
     @override
     void initState() {
-    super.initState();
-    phaseFailures = List.filled(totalPhases, 0);
-    _checkStoredResult();
+        super.initState();
+        phaseFailures = List.filled(totalPhases, 0);
+        _checkStoredResult();
     }
 
 

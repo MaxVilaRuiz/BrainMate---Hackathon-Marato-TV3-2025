@@ -1,6 +1,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../widgets/speech.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Domain3Page extends StatefulWidget {
   const Domain3Page({super.key});
@@ -13,6 +15,9 @@ class _Domain3PageState extends State<Domain3Page> {
   // Test config
   static const int totalPhases = 5;
   static const int repetitionsPerPhase = 2;
+
+  bool loading = true; // to check the SharedPreferences
+  int? storedCompletedPhases;
 
   int currentPhase = 0;
   int currentRepetition = 0;
@@ -27,14 +32,50 @@ class _Domain3PageState extends State<Domain3Page> {
   final TextEditingController controller = TextEditingController();
   final Random random = Random();
 
-  @override
-  void initState() {
-    super.initState();
-    phaseFailures = List.filled(totalPhases, 0);
-  }
+    @override
+    void initState() {
+        super.initState();
+        phaseFailures = List.filled(totalPhases, 0);
+        _checkStoredResult();
+    }
 
 
   // Logic
+    Future<void> _checkStoredResult() async {
+    final prefs = await SharedPreferences.getInstance();
+    final stored = prefs.getString('domain3');
+
+    if (stored != null) {
+        final data = jsonDecode(stored);
+        storedCompletedPhases = data['completedPhases'] as int;
+
+        setState(() {
+        testFinished = true;
+        showInstructions = false;
+        loading = false;
+        });
+    } else {
+        setState(() {
+        loading = false;
+        });
+    }
+    }
+
+    Future<void> _saveResult() async {
+    final prefs = await SharedPreferences.getInstance();
+ 
+    final completedPhases = testFinished && currentPhase < totalPhases
+        ? currentPhase
+        : totalPhases;
+
+    final data = jsonEncode({
+        'completedPhases': completedPhases,
+        'totalPhases': totalPhases,
+    });
+
+    await prefs.setString('domain3', data);
+    }
+
   void _onSpeechWordsUpdated(List<String> words) {
     // Join the words and skip the gaps
     final text = words.join('').replaceAll(' ', '');
@@ -86,6 +127,7 @@ class _Domain3PageState extends State<Domain3Page> {
       setState(() {
         testFinished = true;
       });
+      _saveResult();
       return;
     }
 
@@ -99,6 +141,7 @@ class _Domain3PageState extends State<Domain3Page> {
 
       if (currentPhase == totalPhases) {
         testFinished = true;
+        _saveResult();
         setState(() {});
         return;
       }
@@ -117,16 +160,18 @@ class _Domain3PageState extends State<Domain3Page> {
       appBar: AppBar(
         title: const Text('Test de memòria de treball'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: showInstructions
-            ? _buildInstructions()
-            : testFinished
-                ? _buildResults()
-                : showInput
-                    ? _buildInputPhase()
-                    : _buildShowNumbersPhase(),
-      ),
+      body: loading
+        ? const Center(child: CircularProgressIndicator())
+        : Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: showInstructions
+              ? _buildInstructions()
+              : testFinished
+                  ? _buildResults()
+                  : showInput
+                      ? _buildInputPhase()
+                      : _buildShowNumbersPhase(),
+        ),
     );
   }
 
@@ -234,8 +279,10 @@ class _Domain3PageState extends State<Domain3Page> {
   }
 
   Widget _buildResults() {
-    final failedPhases =
-        phaseFailures.where((f) => f == repetitionsPerPhase).length;
+    final completedPhases = storedCompletedPhases ??
+        (testFinished && currentPhase < totalPhases
+            ? currentPhase
+            : totalPhases);
 
     return Center(
       child: Column(
@@ -247,7 +294,7 @@ class _Domain3PageState extends State<Domain3Page> {
           ),
           const SizedBox(height: 24),
           Text(
-            'Fases fallides: $failedPhases / $totalPhases',
+            'Fases completades correctament: $completedPhases / $totalPhases',
             style: const TextStyle(fontSize: 18),
           ),
           const SizedBox(height: 32),
