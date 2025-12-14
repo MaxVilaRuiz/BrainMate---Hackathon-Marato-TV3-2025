@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'dart:async';
 import '../../widgets/speechrobust.dart';
 import '../../services/map.dart';
 import '../../services/embeddings.dart';
@@ -15,6 +16,10 @@ class Domain1Page extends StatefulWidget
 class _Domain1PageState extends State<Domain1Page> {
 
     Category category = Category.animals;
+    String letter = '';
+    Timer? timer;
+    int milliseconds = 0;
+    bool running = false;
 
     List<String> compareWords = [];
     int correctWords = 0;
@@ -24,6 +29,32 @@ class _Domain1PageState extends State<Domain1Page> {
 
     final TextEditingController controller = TextEditingController();
     final HuggingFaceService _classification = HuggingFaceService();
+
+    String randomLetter()
+    {
+        final random = Random();
+        const letters = 'abcdefghijklmnopqrstuwxyz';
+        return letters[random.nextInt(letters.length)];
+    }
+
+    bool correctLetter(String word)
+    {
+        if(word.isEmpty) return false;
+        return normalizeFirstLetter(word)[0].toLowerCase() == letter;
+    }
+
+    String normalizeFirstLetter(String word) {
+        final first = word[0].toLowerCase();
+        const map = {
+            'á':'a','à':'a','ä':'a','â':'a',
+            'é':'e','è':'e','ë':'e','ê':'e',
+            'í':'i','ì':'i','ï':'i','î':'i',
+            'ó':'o','ò':'o','ö':'o','ô':'o',
+            'ú':'u','ù':'u','ü':'u','û':'u',
+            'ç':'c',
+        };
+        return map[first] ?? first;
+    }
 
     @override
     void initState() {
@@ -43,17 +74,48 @@ class _Domain1PageState extends State<Domain1Page> {
         });
     }
 
+    void _startTimer()
+    {
+        if(running) return;
+
+        running = true;
+        timer = Timer.periodic(const Duration(milliseconds: 200), (timer)
+        {
+            if(!mounted) return;
+            setState(() {
+                milliseconds += 200;
+                if(milliseconds >= 60000) _stopTimer();
+            });
+        });
+    }
+
+    void _stopTimer()
+    {
+        _nextStep();
+        timer?.cancel();
+        running = false;
+    }
+
     void _nextStep()
     {
         compareWords.clear();
         compareWords = controller.text.split(' ');
-        _classification.getEmbeddingVector(controller.text);
+        
+        int ind = 0;
         for(var i in compareWords)
         {
-            if(correctCategory(i, category))
+            int choose = ind%2;
+
+            if(correctCategory(i, category) && choose == 0)
             {
                 correctWords++;
             }
+            else if(correctLetter(i) && choose == 1)
+            {
+                correctWords++;
+            }
+
+            ind++;
         }
 
         print(correctWords);
@@ -66,8 +128,10 @@ class _Domain1PageState extends State<Domain1Page> {
             showInstructions = false;
             // Pick a random category each time the test starts
             category = Category.values[Random().nextInt(Category.values.length)];
+            letter = randomLetter();
             compareWords = [];
         });
+        _startTimer();
         correctWords = 0;
     }
 
@@ -82,7 +146,8 @@ class _Domain1PageState extends State<Domain1Page> {
                 const SizedBox(height: 24),
                 const Text(
                 'You will see a category.\n'
-                'You will have to say words as many words that belong to that category as you can.\n\n',
+                'You will have to say as many words that belong to that category as you can.\n'
+                'Between each word of the category, you will have to say a word that starts with the specified letter.\n',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 16),
                 ),
@@ -99,7 +164,7 @@ class _Domain1PageState extends State<Domain1Page> {
     Widget build(BuildContext context) {
         return Scaffold(
         appBar: AppBar(
-            title: const Text("Fluencia verbal"),
+            title: const Text("Fluencia verbal alternant"),
         ),
         body: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -116,6 +181,8 @@ class _Domain1PageState extends State<Domain1Page> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
                 Text(categoryNames[category] ?? ''),
+                SizedBox(height: 12,),
+                Text(letter),
                 SizedBox(height: 24),
                 TextField(
                     controller: controller,
@@ -128,9 +195,7 @@ class _Domain1PageState extends State<Domain1Page> {
                 SizedBox(height: 24,),
                 // Widget de Speech to Text
                 Expanded(
-                child: //STTUWidget(
-                    //onWordsUpdated: _onSpeechWordsUpdated
-                //),),
+                child:
                     STTWidget(onWordsUpdated: _onSpeechWordsUpdated,)
                 ),
                 SizedBox(height: 24),
@@ -158,5 +223,12 @@ class _Domain1PageState extends State<Domain1Page> {
             ),
         ),
         );
+    }
+
+    @override
+    void dispose() {
+        timer?.cancel();
+        timer = null;
+        super.dispose();
     }
 }

@@ -108,4 +108,10 @@ class STTState extends State<STTWidget>
             ,)
         );
     }
+
+    @override
+    void dispose() {
+        _stopListening();
+        super.dispose();
+    }
 }
