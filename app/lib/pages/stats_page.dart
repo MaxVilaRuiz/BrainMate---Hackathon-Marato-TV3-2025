@@ -96,7 +96,7 @@ Enhorabona! Les teves respostes indiquen que actualment no presentes problemes c
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Text(
-                'Encara no hi ha prou dades.\nFalten $missing dies per omplir formularis.',
+                "Encara no hi ha prou dades.\nFalta $missing qüestionari per omplir per a poder generar un tractament a partir dels resultats de la mesura subjectiva.",
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),

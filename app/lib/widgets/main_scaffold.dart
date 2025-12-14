@@ -33,15 +33,15 @@ class _MainScaffoldState extends State<MainScaffold> {
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Home',
+            label: 'Inici',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.psychology),
-            label: 'Brain',
+            label: 'Tests',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Stats',
+            icon: Icon(Icons.assignment),
+            label: 'Tractament',
           ),
         ],
       ),
