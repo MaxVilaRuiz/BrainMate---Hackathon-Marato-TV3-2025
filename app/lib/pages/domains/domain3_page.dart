@@ -1,8 +1,9 @@
 import 'dart:math';
+import 'package:app/widgets/speechrobust.dart';
 import 'package:flutter/material.dart';
-import '../../widgets/speech.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../widgets/speechrobust.dart';
 
 class Domain3Page extends StatefulWidget {
   const Domain3Page({super.key});
@@ -266,7 +267,7 @@ class _Domain3PageState extends State<Domain3Page> {
           ),
         ),
         const SizedBox(height: 16),
-        STTUWidget(
+        STTWidget(
           onWordsUpdated: _onSpeechWordsUpdated,
         ),
         const Spacer(),

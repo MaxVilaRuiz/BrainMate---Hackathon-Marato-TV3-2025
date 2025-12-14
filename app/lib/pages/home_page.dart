@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/daily_questionnaire_storage.dart';
 import 'daily_questionnaire_page.dart';
-import '../widgets/speech.dart';
+import '../widgets/speechrobust.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -71,7 +71,7 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 24),
 
             const Expanded(
-              child: STTUWidget(),
+              child: STTWidget(),
             ),
           ],
         ),

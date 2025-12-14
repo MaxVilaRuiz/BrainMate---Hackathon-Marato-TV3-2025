@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-import '../../widgets/speech.dart';
+import '../../widgets/speechrobust.dart';
 import '../../services/map.dart';
+import '../../services/embeddings.dart';
 
 class Domain1Page extends StatefulWidget
 {
@@ -21,6 +22,9 @@ class _Domain1PageState extends State<Domain1Page> {
     bool showInstructions = true;
     bool showResults = false;
 
+    final TextEditingController controller = TextEditingController();
+    final HuggingFaceService _classification = HuggingFaceService();
+
     @override
     void initState() {
         super.initState();
@@ -28,11 +32,22 @@ class _Domain1PageState extends State<Domain1Page> {
 
     void _onSpeechWordsUpdated(List<String> words) {
         // Join the words and skip the gaps
-        compareWords = words;
+        //compareWords = words;
+        final text = words.join(' ');
+
+        setState(() {
+            controller.text = text;
+            controller.selection = TextSelection.fromPosition(
+            TextPosition(offset: controller.text.length),
+            );
+        });
     }
 
     void _nextStep()
     {
+        compareWords.clear();
+        compareWords = controller.text.split(' ');
+        _classification.getEmbeddingVector(controller.text);
         for(var i in compareWords)
         {
             if(correctCategory(i, category))
@@ -102,12 +117,23 @@ class _Domain1PageState extends State<Domain1Page> {
             children: [
                 Text(categoryNames[category] ?? ''),
                 SizedBox(height: 24),
+                TextField(
+                    controller: controller,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                        labelText: 'Introdueix la seqüència',
+                        border: OutlineInputBorder(),
+                    ),
+                ),
+                SizedBox(height: 24,),
                 // Widget de Speech to Text
                 Expanded(
-                child: STTUWidget(
-                onWordsUpdated: _onSpeechWordsUpdated
-                ),),
-                SizedBox(height: 24,),
+                child: //STTUWidget(
+                    //onWordsUpdated: _onSpeechWordsUpdated
+                //),),
+                    STTWidget(onWordsUpdated: _onSpeechWordsUpdated,)
+                ),
+                SizedBox(height: 24),
                 ElevatedButton(
                     onPressed: _nextStep,
                     child: const Text('Next'),
