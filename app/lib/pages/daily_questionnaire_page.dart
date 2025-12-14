@@ -81,7 +81,12 @@ class _DailyQuestionnairePageState
             ),
             const SizedBox(height: 24),
             DropdownButtonFormField<String>(
+
               value: selectedOption,
+
+              isExpanded: true,
+              initialValue: selectedOption,
+
               items: options
                   .map(
                     (o) => DropdownMenuItem<String>(
@@ -101,10 +106,18 @@ class _DailyQuestionnairePageState
               ),
             ),
             const Spacer(),
-            ElevatedButton(
-              onPressed: _submit,
-              child: const Text('Enviar'),
+            Align( 
+              child: FractionallySizedBox(
+                widthFactor: 0.6,
+                child: ElevatedButton(
+                  onPressed: _submit,
+                  child: const Text('Enviar'),
+                ),
+              ),
+
+              
             ),
+            
           ],
         ),
       ),
